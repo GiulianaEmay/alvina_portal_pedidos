@@ -1,12 +1,12 @@
 import unittest
 from datetime import date, datetime, timezone
 
-from alvina_website_order_entry.services.order_date import (
-    InvalidOrderDate,
-    minimum_order_date,
-    new_order_date_values,
-    validate_new_order_date,
-)
+from policy_loader import policy
+
+InvalidOrderDate = policy.InvalidOrderDate
+minimum_order_date = policy.minimum_order_date
+new_order_date_values = policy.new_order_date_values
+validate_new_order_date = policy.validate_new_order_date
 
 
 class OrderDatePolicyTest(unittest.TestCase):

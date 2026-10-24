@@ -1,85 +1,99 @@
-# ALVIÑA — Acceso web a pedidos
+# ALVIÑA — Portal de pedidos
 
-**Implementación parcial, sin despliegue. No está lista para habilitar pedidos en
-producción.** El repositorio remoto inspeccionado no contiene commits ni código
-del formulario. Se implementa lo verificable sin sustituir el flujo existente.
+Addon complementario **`alvina_website_order_entry`**. Se coloca junto a los
+addons existentes; **no sustituye `alvinha_mrp`** ni requiere copiar todo el ZIP
+original a este repositorio.
 
-## Componentes entregados
+## Qué hace
 
-- Addon `alvina_website_order_entry`, versión objetivo Odoo **19.0**.
-- Dependencia real: `website`. No se presupone ningún módulo de producción.
-- Herencia de `website.navbar_nav`: enlace «Realizar Pedido» a
-  `/portal/production/new`, sin condición por sesión, como primer elemento del
-  menú estándar (antes de «Contáctanos», no necesariamente justo a su lado).
-  El menú estándar de escritorio y móvil utiliza esa plantilla en Odoo 19.
-- Herencia de `website.submenu`: suprime entradas estándar con la misma ruta
-  interna, incluyendo barra final, query y fragmento. No crea registros de menú.
-- Estilo responsive, fuente heredada y granate provisional `#800020`, configurable
-  mediante la variable CSS `--alvina-order-color` del tema.
-- Política de fechas backend en `services/order_date.py`, sin acceso a datos:
-  mañana en `America/Lima`, valores ISO de default/mínimo y rechazo de fechas
-  ausentes, inválidas, actuales o pasadas. **Todavía no está conectada al formulario
-  ni al guardado de órdenes.**
+- Añade «Realizar Pedido» a `/portal/production/new` como primer elemento del
+  menú estándar, antes de «Contáctanos», tanto para visitantes como para usuarios.
+- Mantiene `auth="user"` de las rutas originales; utiliza el login de Odoo.
+- Selecciona mañana y establece ese mismo mínimo, calculado en **America/Lima**.
+- Rechaza fechas ausentes, imposibles, actuales o pasadas **antes de ejecutar la
+  creación original**, incluso si se manipula el HTML o el JSON-RPC.
+- Comprueba explícitamente el CSRF que el JS original ya envía. Devuelve los
+  errores en el formato que ese JS muestra, conservando selecciones y cantidades.
+- Delega la creación válida al controlador original, sin añadir modelos, campos,
+  permisos, `sudo()` ni modificaciones globales de fechas históricas.
 
-No se crean modelos, campos, permisos, controladores alternativos, autenticación,
-JS ni cambios en órdenes históricas. El enlace directo no impone autenticación:
-eso corresponde al controlador original, que aún falta.
+Granate `#681412`, tomado del encabezado del formulario suministrado. Fuente
+heredada del sitio; color ajustable con la variable CSS `--alvina-order-color`.
+No hace falta instalar recursos JS nuevos.
 
-## Inspección y límites
+## Dependencias identificadas en el ZIP
 
-Se contrastaron los IDs y XPath con los archivos oficiales de Odoo en la rama
-`19.0`: `addons/website/views/website_templates.xml` y
-`addons/website/models/website_menu.py`. **La versión instalada en ALVIÑA no se
-ha confirmado.** Los intentos de lectura de la web y del formulario fueron
-bloqueados por el proxy del entorno (`403 Forbidden` al establecer el túnel).
-No se intentó iniciar sesión, enviar pedidos ni cambiar producción.
+- Versión objetivo: Odoo **19.0**. El código suministrado usa rutas `jsonrpc` y
+  contiene módulos con versiones 19.0; la versión del servidor aún debe confirmarse.
+- Dependencias directas: **`website` y `alvinha_mrp`**.
+- `alvinha_mrp` depende a su vez de `alvinha_base`, `mrp` y `website`, según su
+  manifest original. Esos módulos deben seguir instalados y disponibles.
+- Controlador real: `alvinha_mrp.controllers.main.PortalProductionController`.
+- Plantilla real: `alvinha_mrp.production_form`.
+- Campo del formulario: `date_order`; recepción: `/portal/production/create`.
+- El flujo original crea/agrupa `mrp.production` mediante `date_start`, crea
+  `mrp.production.contact.line` y genera `sale.order` con `commitment_date`.
 
-Falta el código que identifica el módulo, clase/métodos de controlador, QWeb,
-campo real de fecha, modelos creados y todas las rutas de recepción. Consultar
-[docs/INTEGRATION.md](docs/INTEGRATION.md) para completar la integración segura.
+El ZIP original no se redistribuye ni se modifica en este repositorio. El addon
+complementario depende del código que ya mantiene el partner.
 
-El encabezado real podría estar personalizado. Los menús ajenos a las plantillas
-estándar, enlaces absolutos al mismo formulario, botones adicionales del tema y
-otros sitios de una base multisite requieren inspección. El addon afecta todos
-los sitios que usan las plantillas estándar; no instalarlo en una base multisite
-sin revisar ese alcance. No se afirma ausencia de duplicados fuera de ese menú.
-Un nodo desplegable cuya URL sea la del formulario se suprime con sus hijos:
-revisar la estructura real del menú antes de habilitarlo.
+## Instalación por el partner
 
-## Pruebas locales ejecutables
+1. En una **base de pruebas**, confirmar Odoo 19 y la presencia de `alvinha_mrp`.
+2. Copiar únicamente la carpeta **`alvina_website_order_entry`** a la raíz de
+   addons del repositorio del partner, al mismo nivel que `alvinha_mrp`:
 
-Python 3.12 y base IANA de zonas horarias del sistema, sin dependencias de pip:
+   ```text
+   repositorio-del-partner/
+   ├── alvinha_base/
+   ├── alvinha_mrp/
+   └── alvina_website_order_entry/    ← carpeta nueva completa
+   ```
+
+3. El partner incorpora el cambio y actualiza el código del servidor siguiendo
+   su procedimiento habitual. La ruta debe estar incluida en `addons_path`.
+4. En Odoo, actualizar la lista de aplicaciones y buscar el nombre técnico
+   `alvina_website_order_entry` o «ALVIÑA - Acceso a pedidos». **Quitar el filtro
+   predeterminado “Aplicaciones”**, porque es un módulo complementario
+   (`application=False`). Instalarlo; si ya estaba instalado, actualizarlo.
+5. Probar todos los casos de [docs/VALIDATION.md](docs/VALIDATION.md), incluyendo
+   la creación real de un pedido en pruebas, antes de autorizar producción.
+
+Alternativa de consola, usando el ejecutable/configuración reales del partner:
 
 ```bash
-cd /workspace/alvina_portal_pedidos
+odoo-bin -c /ruta/odoo.conf -d BASE_PRUEBAS -i alvina_website_order_entry --stop-after-init
+# Si ya estaba instalado: usar -u en lugar de -i.
+```
+
+Reiniciar por sí solo no instala el módulo ni actualiza las vistas. No se ha
+reiniciado ningún servicio ni ejecutado estos comandos contra ALVIÑA.
+
+## Validación ejecutada
+
+Desde la raíz del repositorio:
+
+```bash
 python -m unittest discover -s tests -v
 ```
 
-Las pruebas comprueban la política de fechas, límites de Lima, fechas manipuladas
-y contrato estático de las vistas. No prueban HTTP, renderizado real de QWeb,
-CSRF, permisos, responsive visual ni creación de órdenes. La matriz pendiente
-está en [docs/VALIDATION.md](docs/VALIDATION.md). No hay Odoo ni PostgreSQL en este
-entorno; tampoco hay base de pruebas ni el módulo del formulario.
+**20 pruebas locales aprobadas**. Cubren fechas, cambio de día Lima, CSRF,
+rechazo previo a la delegación, conservación de parámetros y contrato de vistas.
+Los tests del controlador usan dobles de Odoo y del padre: no demuestran que
+Odoo se haya instalado ni que sus rutas HTTP/ORM funcionen en el servidor.
 
-## Instalación / actualización en un servidor de pruebas
+Se contrastaron los XPath del encabezado con Odoo 19 oficial y el de fecha con
+el XML real del ZIP. No hay Odoo/PostgreSQL ni base de pruebas en este entorno.
+**La instalación y el flujo completo deben validarse en staging antes de
+producción. No se garantiza ausencia de fallos en un servidor no probado.**
 
-1. Obtener y revisar primero el módulo original y confirmar la versión. Completar
-   la integración descrita en `docs/INTEGRATION.md` antes de habilitar el botón
-   para usuarios finales. Utilizar una base de pruebas y datos anonimizados.
-2. Copiar `alvina_website_order_entry` dentro de un directorio ya incluido en
-   `addons_path` del servidor Odoo 19. No modificar el núcleo de Odoo.
-3. Con el ejecutable y configuración reales del servidor, instalar en la base de
-   pruebas: `odoo-bin -c /ruta/odoo.conf -d BASE_PRUEBAS -i
-   alvina_website_order_entry --stop-after-init`. Para actualizar un addon ya
-   instalado, usar `-u alvina_website_order_entry` en vez de `-i`.
-4. Arrancar la instancia de pruebas por su procedimiento habitual y verificar la
-   matriz completa. Revisar los assets del frontend, menús de ambos tamaños,
-   color de marca y permisos de cada sucursal.
-5. El despliegue real y cualquier reinicio requieren autorización expresa y el
-   procedimiento de respaldo y actualización del administrador del servidor.
+## Alcance y revisión técnica
 
-Los comandos anteriores son instrucciones: **no se ejecutaron en ALVIÑA**.
-No requiere secretos nuevos para las pruebas unitarias. No compartir claves ni
-contraseñas en el repositorio o en el chat.
+Consultar [docs/INTEGRATION.md](docs/INTEGRATION.md) para el detalle del código
+original, compatibilidad y limitaciones. Un tema con encabezado propio puede
+requerir adaptar la herencia. El enlace es el primer elemento del menú estándar,
+no necesariamente el inmediatamente anterior a Contacto. Se suprimen duplicados
+con la ruta interna; enlaces absolutos o botones propios del tema se revisan en
+staging. El alcance es todos los sitios que usan esas plantillas estándar.
 
-Licencia del addon y código de este repositorio: AGPL-3.0-or-later.
+Licencia del addon complementario: AGPL-3.0-or-later.

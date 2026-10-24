@@ -17,11 +17,23 @@ class HeaderContractTest(unittest.TestCase):
 
     def test_only_verified_website_dependency_and_views(self):
         manifest = ast.literal_eval((ADDON / "__manifest__.py").read_text())
-        self.assertEqual(manifest["depends"], ["website"])
+        self.assertEqual(manifest["depends"], ["website", "alvinha_mrp"])
         self.assertEqual(
             {item.attrib["inherit_id"] for item in self.tree.findall("template")},
             {"website.navbar_nav", "website.submenu"},
         )
+
+    def test_real_date_input_is_extended_without_replacing_form(self):
+        tree = ET.parse(ADDON / "views/production_form.xml")
+        template = tree.find("template")
+        self.assertEqual(template.attrib["inherit_id"], "alvinha_mrp.production_form")
+        operation = template.find("xpath")
+        self.assertEqual(operation.attrib["position"], "attributes")
+        self.assertIn("input[@name='date_order']", operation.attrib["expr"])
+        attrs = {node.attrib["name"]: node.text for node in operation}
+        self.assertEqual(attrs["t-att-value"], "today")
+        self.assertEqual(attrs["t-att-min"], "today")
+        self.assertEqual(attrs["required"], "1")
 
     def test_single_unconditional_link_precedes_menu_slot(self):
         template = self.tree.find("template[@id='navbar_order_entry']")

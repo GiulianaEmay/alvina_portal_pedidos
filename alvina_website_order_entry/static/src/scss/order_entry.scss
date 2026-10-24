@@ -1,12 +1,12 @@
-// The exact production brand colour must be confirmed with the installed theme.
+// Colour used by the supplied alvinha_mrp order form heading.
 header .alvina-order-entry {
     align-self: center;
     max-width: 100%;
     padding: .25rem .5rem;
 
     .alvina-order-button {
-        background-color: var(--alvina-order-color, #800020);
-        border: 1px solid var(--alvina-order-color, #800020);
+        background-color: var(--alvina-order-color, #681412);
+        border: 1px solid var(--alvina-order-color, #681412);
         border-radius: .25rem;
         color: #fff;
         font-family: inherit;

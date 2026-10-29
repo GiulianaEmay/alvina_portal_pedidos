@@ -21,6 +21,10 @@ Granate `#681412`, tomado del encabezado del formulario suministrado. Fuente
 heredada del sitio; color ajustable con la variable CSS `--alvina-order-color`.
 No hace falta instalar recursos JS nuevos.
 
+La versión `19.0.1.2.0` centra el botón verticalmente y amplía el contenedor del
+encabezado estándar en escritorio, con márgenes laterales de aproximadamente
+12–24 px. No amplía el contenido de las páginas ni el panel del menú móvil.
+
 ## Dependencias identificadas en el ZIP
 
 - Versión objetivo: Odoo **19.0**. El código suministrado usa rutas `jsonrpc` y

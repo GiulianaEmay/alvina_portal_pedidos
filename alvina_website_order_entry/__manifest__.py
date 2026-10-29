@@ -1,7 +1,7 @@
 {
     "name": "ALVIÑA - Acceso a pedidos",
     "summary": "Acceso web a pedidos y política reutilizable de fechas Lima",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "category": "Website",
     "author": "Grupo ALVIÑA",
     "license": "AGPL-3",

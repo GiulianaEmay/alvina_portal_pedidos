@@ -7,7 +7,7 @@
         <xpath expr="//t[@t-out='0']" position="before">
             <li class="nav-item alvina-order-entry" role="presentation">
                 <a href="/portal/production/new" role="menuitem"
-                   class="nav-link btn alvina-order-button">Realizar Pedido</a>
+                   class="btn btn-primary alvina-order-button">Realizar Pedido</a>
             </li>
         </xpath>
     </template>

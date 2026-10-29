@@ -21,7 +21,9 @@ Granate `#681412`, tomado del encabezado del formulario suministrado. Fuente
 heredada del sitio; color ajustable con la variable CSS `--alvina-order-color`.
 No hace falta instalar recursos JS nuevos.
 
-La versión `19.0.1.2.0` centra el botón verticalmente y amplía el contenedor del
+La versión `19.0.1.3.0` mantiene el texto del botón en una sola línea, incluso
+en móvil, y utiliza el tamaño del botón primario del tema como «Contáctanos».
+También centra el botón verticalmente y amplía el contenedor del
 encabezado estándar en escritorio, con márgenes laterales de aproximadamente
 12–24 px. No amplía el contenido de las páginas ni el panel del menú móvil.
 
